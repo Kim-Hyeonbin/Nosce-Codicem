@@ -13,6 +13,11 @@ class TraceController:
     def __init__(self):
         # 현재 trace 중인지 여부를 나타내는 플래그 변수
         self._tracing = False
+        # 핸들러 목록
+        self._handlers = []
+
+    def register_handler(self, handler):
+        self._handlers.append(handler)
 
     # settrace에 직접 넘길 콜백
     def _trace_func(self, frame, event, arg):
@@ -29,7 +34,22 @@ class TraceController:
             event_type=event,  # 이벤트 타입 부여
             lineno=frame.f_lineno,  # 현재 프레임이 실행 중인 줄 번호
             func_name=code.co_name,  # 코드 객체의 이름 (함수 이름)
+            frame_locals=frame.f_locals,  # 현재 프레임에서 사용 중인 지역 변수들
         )
+
+        # 내부 함수 이름은 무시
+        if frame.f_code.co_name in (
+            "start_trace",
+            "stop_trace",
+            "_trace_func",
+            "dispatch_event",
+        ):
+            return self._trace_func
+
+        # 엔진 내부 파일은 추적하지 않도록 처리
+        filename = frame.f_code.co_filename.replace("\\", "/")  # 윈도우 경로 보정
+        if "/nosce_codicem/" in filename:
+            return self._trace_func
 
         # 최소 기능: 그냥 찍어보기
         print(f"[TRACE] {evt.event_type:6} {evt.func_name} @ line {evt.lineno}")
@@ -62,11 +82,11 @@ class TraceController:
         sys.settrace(None)
 
     def dispatch_event(self, event: TraceEvent):
-        """
-        PHASE 0에서는 아무것도 하지 않는 껍데기.
-        이후 PHASE 1에서 handler들에게 전달하는 로직 추가 예정.
-        """
-        pass
+        # 모든 핸들러에 이벤트를 뿌려주고,
+        # match_event가 True인 녀석만 handle 호출
+        for h in self._handlers:
+            if h.match_event(event):
+                h.handle(event)
 
 
 # 간단한 싱글톤 스타일로 써먹기 좋게 하나 임시로 만들어 둠

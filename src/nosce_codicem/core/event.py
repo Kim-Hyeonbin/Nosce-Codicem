@@ -16,3 +16,4 @@ class TraceEvent:
     event_type: str
     lineno: int
     func_name: str
+    frame_locals: dict = None
