@@ -4,10 +4,8 @@ from .event import TraceEvent
 
 class TraceController:
     """
-    PHASE 0용 최소 TraceController.
     - sys.settrace 등록/해제
     - frame, event를 받아서 TraceEvent로 변환
-    - 일단은 print만 하고, dispatch_event는 빈 껍데기
     """
 
     def __init__(self):
@@ -21,12 +19,12 @@ class TraceController:
 
     # settrace에 직접 넘길 콜백
     def _trace_func(self, frame, event, arg):
-        # PHASE 0에서는 call/line/return만 신경 씀
+        # 현 단계에서는 call/line/return만 신경 씀
         if event not in ("call", "line", "return"):
             # exception 등의 상황에서도 추적은 유지
             return self._trace_func
 
-        # frame을 통해 코드 객체 생성
+        # frame을 통해 함수 코드 객체 생성
         code = frame.f_code
 
         # 이벤트 추적 객체 생성
@@ -52,7 +50,7 @@ class TraceController:
             return self._trace_func
 
         # 최소 기능: 그냥 찍어보기
-        print(f"[TRACE] {evt.event_type:6} {evt.func_name} @ line {evt.lineno}")
+        # print(f"[TRACE] {evt.event_type:6} {evt.func_name} @ line {evt.lineno}")
 
         # 이후 PHASE 1에서 핸들러에게 넘기도록 확장
         self.dispatch_event(evt)
