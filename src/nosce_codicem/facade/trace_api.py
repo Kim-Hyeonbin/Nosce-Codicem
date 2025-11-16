@@ -1,8 +1,8 @@
-# nosce_codicem/facade/trace_api.py
-
 from ..core.controller import controller
 from ..handlers.loop import LoopHandler
 from ..observers.variable import VariableObserver
+from ..output.formatter import LoopFormatter
+from ..output.renderer import Renderer
 
 
 class TraceBuilder:
@@ -18,7 +18,13 @@ class TraceBuilder:
         observer = VariableObserver(self._var_names)
 
         # 2) Handler 생성
-        handler = LoopHandler(line_start, line_end, observer)
+        handler = LoopHandler(
+            line_start,
+            line_end,
+            observer,
+            formatter=LoopFormatter(),
+            renderer=Renderer(),
+        )
 
         # 3) Controller에 등록
         controller.register_handler(handler)
@@ -31,4 +37,5 @@ class TraceBuilder:
 
 # 사용자가 import해서 쓸 단일 인터페이스
 trace = TraceBuilder()
+
 # trace 함수는 코드 맨 위에서 호출되어야 함

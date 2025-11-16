@@ -1,17 +1,66 @@
-class Formatter:
-    def format(self, lineno, snapshot, iteration):
+class BaseFormatter:
+    """
+    모든 Formatter의 기반 클래스.
+    - 문자열이 아니라 JSON으로 직렬화 가능한 dict만 반환해야 함.
+    - 렌더러(또는 viewer)가 UI와 스타일을 책임지므로
+      formatter는 "데이터 정제"만 담당.
+    """
+
+    def format(self, event, snapshot, meta):
         """
-        lineno : 실행된 라인 번호
-        snapshot : observer.capture()가 반환한 dict
-        차후 renderer와 통합하거나 renderer를 조정할 수 있도록 수정 예정
+        event : TraceEvent 객체 전체
+        snapshot : observer.capture() 결과 (dict)
+        meta : handler가 전달하는 부가 정보(ex. iteration, depth 등)
         """
+        raise NotImplementedError("format() must be overridden.")
 
-        # 첫 줄: [line N]
-        lines = [f"[line {lineno}] #Loop-{iteration}"]
 
-        # 두 번째 줄부터: 2칸 들여쓰기 + key : value
-        for var, val in snapshot.items():
-            lines.append(f"  {var} : {val}")
+class LoopFormatter(BaseFormatter):
+    """
+    반복문(loop) 전용 formatter.
+    handler에서 iteration 정보를 meta로 넘겨주면
+    그걸 그대로 구조화해서 반환한다.
+    """
 
-        # 문자열로 합쳐서 반환
-        return "\n".join(lines)
+    def format(self, event, snapshot, meta):
+        return {
+            "type": "loop",
+            "lineno": event.lineno,
+            "iteration": meta.get("iteration"),
+            "variables": snapshot,
+            "func_name": event.func_name,
+        }
+
+
+class ConditionFormatter(BaseFormatter):
+    """
+    조건(condition) 전용 formatter.
+    조건이 True인지 False인지 등 메타데이터를 기록한다.
+    구조는 차후 수정
+    """
+
+    def format(self, event, snapshot, meta):
+        return {
+            "type": "condition",
+            "lineno": event.lineno,
+            "branch": meta.get("branch"),  # "then" or "else"
+            "variables": snapshot,
+            "func_name": event.func_name,
+        }
+
+
+class RecursionFormatter(BaseFormatter):
+    """
+    재귀 호출 전용 formatter.
+    depth와 call stack 정보를 담을 수 있다.
+    구조는 차후 수정
+    """
+
+    def format(self, event, snapshot, meta):
+        return {
+            "type": "recursion",
+            "lineno": event.lineno,
+            "depth": meta.get("depth"),
+            "variables": snapshot,
+            "func_name": event.func_name,
+        }

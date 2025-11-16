@@ -1,5 +1,4 @@
 # sys.settrace의 속성을 정제하기 위한 클래스
-# nosce_codicem/core/event.py
 from dataclasses import dataclass
 
 
