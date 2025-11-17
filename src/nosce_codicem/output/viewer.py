@@ -41,7 +41,7 @@ def render_variable_table(recs):
     for name in var_names:
         # 폭 고정
         table.add_column(
-            name, justify="center", min_width=15, max_width=15, no_wrap=True
+            name, justify="center", min_width=15, max_width=15, no_wrap=False
         )
 
     for idx_rec, rec in enumerate(recs):
@@ -98,7 +98,7 @@ def render_list_table(list_name, recs, chunk_size=10):
         for idx in chunk:
             label = f"[{idx}]"
             table.add_column(
-                label, justify="center", min_width=5, max_width=5, no_wrap=True
+                label, justify="center", min_width=5, max_width=5, no_wrap=False
             )
 
         # 값 채우기
@@ -150,9 +150,7 @@ def render_loop(records):
 
         if not is_list_mode:
             render_variable_table(recs)
-            console.print(
-                "\n[dim]────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[/dim]\n"
-            )
+            console.print("\n " + ("─" * (console.width - 2)) + " \n")
             continue
 
         for name in first_snapshot.keys():
@@ -160,9 +158,7 @@ def render_loop(records):
             tables = render_list_table(name, recs)
             for t in tables:
                 console.print(t)
-            console.print(
-                "\n[dim]────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[/dim]\n"
-            )
+            console.print("\n " + ("─" * (console.width - 2)) + " \n")
 
     console.input("\nPress Enter to exit...")
 
