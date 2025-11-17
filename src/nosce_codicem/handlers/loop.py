@@ -71,6 +71,6 @@ class LoopHandler(BaseHandler):
                 )
                 self.records.append(formatted)
 
-        # ❗ 최종적으로 renderer를 딱 1번 호출
+        # 최종적으로 renderer를 딱 1번 호출
         if self.records:
             self.renderer(self.records, dtype="loop")
