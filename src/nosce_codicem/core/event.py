@@ -5,7 +5,6 @@ from dataclasses import dataclass
 @dataclass  # 클래스를 구조체처럼 정의
 class TraceEvent:
     """
-    PHASE 0 최소 이벤트 구조체.
     - event_type: "call" / "line" / "return"
     - lineno: 현재 줄 번호
     - func_name: 함수 이름

@@ -32,23 +32,6 @@ class LoopFormatter(BaseFormatter):
         }
 
 
-class ConditionFormatter(BaseFormatter):
-    """
-    조건(condition) 전용 formatter.
-    조건이 True인지 False인지 등 메타데이터를 기록한다.
-    구조는 차후 수정
-    """
-
-    def format(self, event, snapshot, meta):
-        return {
-            "type": "condition",
-            "lineno": event.lineno,
-            "branch": meta.get("branch"),  # "then" or "else"
-            "variables": snapshot,
-            "func_name": event.func_name,
-        }
-
-
 class RecursionFormatter(BaseFormatter):
     """
     재귀 호출 전용 formatter.

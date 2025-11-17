@@ -164,11 +164,8 @@ def render_loop(records):
 
 
 # -------------------------------------------------------
-# Condition / Recursion (아직 미구현)
+#  Recursion (아직 미구현)
 # -------------------------------------------------------
-def render_condition(data):
-    console.print("[yellow]Condition trace not implemented yet.[/]")
-    console.input("\nPress Enter to exit...")
 
 
 def render_recursion(data):
@@ -192,8 +189,6 @@ if __name__ == "__main__":
 
     if dtype == "loop":
         render_loop(data)
-    elif dtype == "condition":
-        render_condition(data)
     elif dtype == "recursion":
         render_recursion(data)
     else:
