@@ -11,20 +11,9 @@ console = Console()
 
 
 # -------------------------------------------------------
-# 리스트 인덱스 축약 규칙
-# -------------------------------------------------------
-def select_indices(length):
-    if length < 20:
-        return list(range(length))
-    if 20 <= length <= 100:
-        return list(range(15)) + ["..."] + list(range(length - 5, length))
-    return list(range(10)) + ["..."] + list(range(length - 10, length))
-
-
-# -------------------------------------------------------
 # 값 truncate (A 방식)
 # -------------------------------------------------------
-def truncate(v, width=4):
+def truncate(v, width=9):
     s = str(v)
     return s if len(s) <= width else (s[: width - 1] + "…")
 
@@ -41,22 +30,22 @@ def render_variable_table(recs):
     for name in var_names:
         # 폭 고정
         table.add_column(
-            name, justify="center", min_width=15, max_width=15, no_wrap=False
+            name, justify="center", min_width=12, max_width=12, no_wrap=False
         )
 
     for idx_rec, rec in enumerate(recs):
         row = [str(rec["lineno"])]
         for name in var_names:
             val = rec["variables"].get(name)
-            row.append("" if val is None else truncate(val, width=4))
+            row.append("" if val is None else truncate(val, width=9))
 
         table.add_row(*row)
 
         if idx_rec != len(recs) - 1:
             sep = []
-            sep.append("[dim cyan]" + "─" * 10 + "[/dim cyan]")
+            sep.append("[dim cyan]" + "─" * 12 + "[/dim cyan]")
             for name in var_names:
-                sep.append("[dim cyan]" + "─" * 15 + "[/dim cyan]")
+                sep.append("[dim cyan]" + "─" * 12 + "[/dim cyan]")
             table.add_row(*sep)
 
     console.print(table)
