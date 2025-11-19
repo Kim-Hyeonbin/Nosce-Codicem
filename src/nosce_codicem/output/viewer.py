@@ -197,7 +197,7 @@ def render_recursion(records):
     # 데이터 채우기
     for idx, rec in enumerate(records):
         row = [
-            str(rec["depth"]),
+            str(rec["depth"] if rec["depth"] != 0 else "Result"),
             str(rec["lineno"]),
         ]
 

@@ -10,7 +10,7 @@ class Renderer:
     """
     LoopHandler에서 finalize() 호출 시,
     records를 JSON 파일로 저장해두고,
-    viewer.py를 새 CMD 창에서 실행하도록 한다.
+    viewer.py를 새 CMD 창에서 실행
     """
 
     def __init__(self, viewer_path=None):
@@ -22,22 +22,22 @@ class Renderer:
 
     def __call__(self, records, dtype="loop"):
 
-        # 1) JSON을 임시파일에 저장
+        # JSON을 임시파일에 저장
         tmp = tempfile.NamedTemporaryFile(
             delete=False, suffix=".json", mode="w", encoding="utf-8"
         )
         json.dump(records, tmp)
         tmp.close()
 
-        data_path = tmp.name  # 이 경로만 viewer.py 에 넘긴다
+        data_path = tmp.name  # 이 경로만 viewer.py로 전달
 
-        # 2) viewer 명령 구성
+        # viewer 명령 구성
         cmd = [sys.executable, "-u", self.viewer_path, dtype, data_path]
 
-        # 3) Windows에서 새 콘솔 열기 옵션
+        # Windows에서 새 콘솔 열기 옵션
         creationflags = 0
         if os.name == "nt" and hasattr(subprocess, "CREATE_NEW_CONSOLE"):
             creationflags = subprocess.CREATE_NEW_CONSOLE
 
-        # 4) 실행
+        # 실행
         subprocess.Popen(cmd, creationflags=creationflags)

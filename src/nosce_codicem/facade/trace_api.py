@@ -1,8 +1,10 @@
 from ..core.controller import controller
 from ..handlers.loop import LoopHandler
+from ..handlers.recursion import RecursionHandler
 from ..observers.variable import VariableObserver
 from ..observers.list import ListObserver
 from ..output.formatter import LoopFormatter
+from ..output.formatter import RecursionFormatter
 from ..output.renderer import Renderer
 
 
@@ -22,6 +24,8 @@ class TraceBuilder:
         self._list_names = names
         self._var_names = None  # 변수와 리스트 동시 추적 금지
         return self
+
+    # 반복문 로직 -------------------------------------------
 
     def loop(self, line_start, line_end):
         # 1) Observer 생성
@@ -50,6 +54,33 @@ class TraceBuilder:
         controller.start_trace()
 
         return self
+
+        # 반복문 로직 끝 -----------------------------------------
+
+        # 재귀문 로직 --------------------------------------------
+
+    def recursion(self, func_name):
+        # observer 생성
+        if self._var_names:
+            observer = VariableObserver(self._var_names)
+        elif self._list_names:
+            observer = ListObserver(self._list_names)
+        else:
+            raise ValueError("variable() 또는 list() 중 하나는 반드시 지정해야 합니다.")
+
+        handler = RecursionHandler(
+            target_func_name=func_name,
+            observer=observer,
+            formatter=RecursionFormatter(),
+            renderer=Renderer(),
+        )
+
+        controller.register_handler(handler)
+        controller.start_trace()
+
+        return self
+
+    # 재귀문 로직 끝 ------------------------------------------
 
 
 # 사용자가 import해서 쓸 단일 인터페이스
