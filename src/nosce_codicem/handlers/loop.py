@@ -60,7 +60,7 @@ class LoopHandler(BaseHandler):
         trace 종료 시 controller가 호출해주는 메서드.
         이때 단 한 번만 viewer를 실행한다.
         """
-        # 마지막 버퍼도 flush
+        # 마지막 버퍼 flush
         if self._prev_event is not None:
             snapshot = self.observer.capture(self._prev_locals)
             if snapshot:

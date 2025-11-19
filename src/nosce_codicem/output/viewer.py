@@ -131,8 +131,22 @@ def render_loop(records):
     for iteration in sorted(grouped.keys()):
         recs = grouped[iteration]
 
-        console.print(Panel(f"Loop #{iteration}", style="bold magenta", expand=False))
+    # iteration 식별
+    iterations = sorted(grouped.keys())
+
+    for idx, iteration in enumerate(iterations):
+        recs = grouped[iteration]
+        is_last = idx == len(iterations) - 1
+
+        # 마지막 루프에서 테이블 제목 수정
+        title = "Result" if is_last else f"Loop #{iteration}"
+
+        console.print(Panel(title, style="bold magenta", expand=False))
         console.print()
+
+        # Result 출력 시 첫 행만 출력
+        if is_last:
+            recs = [recs[0]]
 
         first_snapshot = recs[0]["variables"]
         is_list_mode = any(isinstance(v, list) for v in first_snapshot.values())
@@ -153,12 +167,56 @@ def render_loop(records):
 
 
 # -------------------------------------------------------
-#  Recursion (아직 미구현)
+#  Recursion 전체 랜더링
 # -------------------------------------------------------
 
 
-def render_recursion(data):
-    console.print("[magenta]Recursion trace not implemented yet.[/]")
+def render_recursion(records):
+    console.rule("[bold magenta]Recursion Trace[/bold magenta]")
+
+    if not records:
+        console.print("[red]No recursion records found.[/red]")
+        console.input("\nPress Enter to exit...")
+        return
+
+    # 첫 스냅샷 기준으로 변수 이름 추출
+    var_names = list(records[0]["variables"].keys())
+
+    # 테이블 생성
+    table = Table(box=box.ROUNDED, border_style="bright_blue")
+
+    table.add_column("depth", justify="center", style="cyan", no_wrap=True, min_width=5)
+    table.add_column("line", justify="center", style="cyan", no_wrap=True, min_width=5)
+
+    # 변수 컬럼 추가
+    for name in var_names:
+        table.add_column(
+            name, justify="center", min_width=12, max_width=12, no_wrap=False
+        )
+
+    # 데이터 채우기
+    for idx, rec in enumerate(records):
+        row = [
+            str(rec["depth"]),
+            str(rec["lineno"]),
+        ]
+
+        for name in var_names:
+            val = rec["variables"].get(name)
+            row.append("" if val is None else truncate(val, width=9))
+
+        table.add_row(*row)
+
+        # separator
+        if idx != len(records) - 1:
+            sep = []
+            sep.append("[dim cyan]" + "─" * 5 + "[/dim cyan]")  # depth
+            sep.append("[dim cyan]" + "─" * 5 + "[/dim cyan]")  # line
+            for _ in var_names:
+                sep.append("[dim cyan]" + "─" * 12 + "[/dim cyan]")  # 변수들
+            table.add_row(*sep)
+
+    console.print(table)
     console.input("\nPress Enter to exit...")
 
 
