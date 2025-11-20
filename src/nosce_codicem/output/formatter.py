@@ -43,6 +43,7 @@ class RecursionFormatter(BaseFormatter):
     def format(self, event, snapshot, meta):
         return {
             "type": "recursion",
+            "event_type": meta.get("event_type"),
             "lineno": event.lineno,
             "depth": meta.get("depth"),
             "variables": snapshot,

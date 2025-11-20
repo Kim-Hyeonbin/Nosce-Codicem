@@ -16,4 +16,4 @@ def fib(n):
 # ---- 추적 ----
 trace.variable("n", "a", "b", "result").recursion("fib")
 
-fib(5)
+fib(15)

@@ -129,11 +129,11 @@ def render_loop(records):
     for rec in records:
         grouped.setdefault(rec["iteration"], []).append(rec)
 
-    for iteration in sorted(grouped.keys()):
+    for iteration in grouped.keys():
         recs = grouped[iteration]
 
     # iteration 식별
-    iterations = sorted(grouped.keys())
+    iterations = grouped.keys()
 
     for idx, iteration in enumerate(iterations):
         recs = grouped[iteration]
@@ -175,6 +175,7 @@ def render_loop(records):
 #  재귀 트리 랜더링
 def render_recursion_tree(records):
     console.rule("[bold magenta]Recursion Call Tree[/bold magenta]")
+    console.print()
 
     if not records:
         console.print("[red]No recursion data.[/red]")
@@ -215,7 +216,7 @@ def render_recursion_tree(records):
         vars_snapshot = rep.get("variables", {}) or {}
 
         parts = []
-        for k in sorted(vars_snapshot.keys()):
+        for k in vars_snapshot.keys():
             v = vars_snapshot[k]
             parts.append(f"[cyan]{k}[/cyan]={v}")
 
@@ -262,7 +263,7 @@ def render_recursion_tree(records):
 
     # 트리 구성
     def build_tree(call_id, parent_node):
-        label = f"{func_name_map[call_id]}  [dim](depth={depth_map[call_id]})[/dim]"
+        label = f"{func_name_map[call_id]} [dim](depth={depth_map[call_id]})[/dim]"
         node = parent_node.add(label)
 
         # 이 call_id에 해당하는 이벤트 묶음
@@ -285,12 +286,43 @@ def render_recursion_tree(records):
     build_tree(root_id, root)
 
     console.print(root)
-    console.input("\nPress Enter to exit...")
+
+
+# 재귀 타임라인 랜더링
+def render_recursion_timeline(records):
+    console.print(Rule("[bold magenta]Recursion Timeline[/bold magenta]\n"))
+    console.print()
+
+    logical_depth = 0
+
+    for rec in records:
+        etype = rec.get("event_type")
+        func_name = rec.get("func_name")
+        call_id = rec.get("call_id")
+
+        # CALL
+        if etype == "call":
+            indent = "    " * logical_depth
+            console.print(f"{indent}→ call [red]#{call_id}[/red] {func_name}()")
+            console.print()
+            logical_depth += 1
+            continue
+
+        # RETURN
+        if etype == "return":
+            indent = "    " * logical_depth
+            console.print(f"{indent}← return [red]#{call_id}[/red]")
+            console.print()
+            logical_depth -= 1
+            continue
 
 
 # 트리 + 타임라인 통합
 def render_recursion(records):
     render_recursion_tree(records)
+    console.print("\n\n")
+    render_recursion_timeline(records)
+    console.input("\nPress Enter to exit...")
 
 
 # -------------------------------------------------------
