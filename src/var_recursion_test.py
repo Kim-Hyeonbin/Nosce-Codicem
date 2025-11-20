@@ -1,17 +1,20 @@
 from nosce_codicem.facade.trace_api import trace
 
 
-def fact(n):
-    x = n  # 지역변수 1
-    if n <= 1:
-        return 1
+def partition_sum(arr):
+    size = len(arr)
+    if size <= 1:
+        return sum(arr)
 
-    y = fact(n - 1)  # 지역변수 2
-    z = x * y  # 지역변수 3
-    return z
+    half = size // 2
+    left = partition_sum(arr[:half])
+    right = partition_sum(arr[half:])
+    total = left + right
+    return total
 
 
-# 재귀문 변수 추적 시작
-trace.variable("n", "x", "y", "z").recursion("fact")
+trace.variable("arr", "size", "half", "left", "right", "total").recursion(
+    "partition_sum"
+)
 
-print("result =", fact(4))
+print(partition_sum([5, 2, 7, 1, 9]))

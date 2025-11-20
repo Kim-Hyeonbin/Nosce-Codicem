@@ -35,8 +35,9 @@ class LoopFormatter(BaseFormatter):
 class RecursionFormatter(BaseFormatter):
     """
     재귀 호출 전용 formatter.
-    depth와 call stack 정보를 담을 수 있다.
-    구조는 차후 수정
+    - depth: 재귀 깊이
+    - call_id: 이 호출의 ID (스택 기반으로 할당)
+    - parent_id: 부모 호출의 ID
     """
 
     def format(self, event, snapshot, meta):
@@ -46,4 +47,7 @@ class RecursionFormatter(BaseFormatter):
             "depth": meta.get("depth"),
             "variables": snapshot,
             "func_name": event.func_name,
+            "call_id": meta.get("call_id"),
+            "parent_id": meta.get("parent_id"),
+            "mode": meta.get("mode"),
         }

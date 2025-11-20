@@ -5,6 +5,7 @@ import copy
 class ListObserver(BaseObserver):
     def __init__(self, list_names):
         self.list_names = list_names
+        self.mode = "list"
 
     def capture(self, locals_dict):
         snapshot = {}

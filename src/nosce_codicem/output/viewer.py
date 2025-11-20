@@ -5,13 +5,14 @@ import time
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich.tree import Tree
 from rich import box
 
 console = Console()
 
 
 # -------------------------------------------------------
-# 값 truncate (A 방식)
+# 값 truncate
 # -------------------------------------------------------
 def truncate(v, width=9):
     s = str(v)
@@ -167,57 +168,133 @@ def render_loop(records):
 
 
 # -------------------------------------------------------
-#  Recursion 전체 랜더링
+#  재귀 랜더링
 # -------------------------------------------------------
 
 
-def render_recursion(records):
-    console.rule("[bold magenta]Recursion Trace[/bold magenta]")
+#  재귀 트리 랜더링
+def render_recursion_tree(records):
+    console.rule("[bold magenta]Recursion Call Tree[/bold magenta]")
 
     if not records:
-        console.print("[red]No recursion records found.[/red]")
+        console.print("[red]No recursion data.[/red]")
         console.input("\nPress Enter to exit...")
         return
 
-    # 첫 스냅샷 기준으로 변수 이름 추출
-    var_names = list(records[0]["variables"].keys())
+    # call_id 기준으로 모든 레코드 그룹핑
 
-    # 테이블 생성
-    table = Table(box=box.ROUNDED, border_style="bright_blue")
+    grouped = {}
+    parent_map = {}
+    func_name_map = {}
+    depth_map = {}
 
-    table.add_column("depth", justify="center", style="cyan", no_wrap=True, min_width=5)
-    table.add_column("line", justify="center", style="cyan", no_wrap=True, min_width=5)
+    for rec in records:
+        cid = rec.get("call_id")
+        pid = rec.get("parent_id")
+        if cid is None:
+            continue
 
-    # 변수 컬럼 추가
-    for name in var_names:
-        table.add_column(
-            name, justify="center", min_width=12, max_width=12, no_wrap=False
+        grouped.setdefault(cid, []).append(rec)
+        parent_map[cid] = pid
+        func_name_map[cid] = rec.get("func_name")
+        depth_map[cid] = rec.get("depth")
+
+    # root call_id 찾기
+
+    roots = [cid for cid, pid in parent_map.items() if pid is None]
+
+    if not roots:
+        console.print("[red]No root call found.[/red]")
+        return
+
+    root_id = roots[0]
+
+    # 변수 패널
+    def build_var_panel(call_id, events):
+        rep = events[-1]
+        vars_snapshot = rep.get("variables", {}) or {}
+
+        parts = []
+        for k in sorted(vars_snapshot.keys()):
+            v = vars_snapshot[k]
+            parts.append(f"[cyan]{k}[/cyan]={v}")
+
+        line = ", ".join(parts) if parts else "[dim]no variables[/dim]"
+        header = f"[red]#{call_id}[/red]  {line}"
+
+        return Panel(
+            header,
+            padding=(0, 1),
+            border_style="green",
         )
 
-    # 데이터 채우기
-    for idx, rec in enumerate(records):
-        row = [
-            str(rec["depth"] if rec["depth"] != 0 else "Result"),
-            str(rec["lineno"]),
-        ]
+    # 리스트 패널
+    def build_list_panel(call_id, events):
+        rep = events[-1]
+        vars_snapshot = rep.get("variables", {}) or {}
 
-        for name in var_names:
-            val = rec["variables"].get(name)
-            row.append("" if val is None else truncate(val, width=9))
+        lines = [f"[red]#{call_id}[/red]"]
 
-        table.add_row(*row)
+        def summarize_list(lst):
+            if len(lst) <= 2:
+                return ", ".join(str(x) for x in lst)
+            return f"{lst[0]}, {lst[1]}, ..."
 
-        # separator
-        if idx != len(records) - 1:
-            sep = []
-            sep.append("[dim cyan]" + "─" * 5 + "[/dim cyan]")  # depth
-            sep.append("[dim cyan]" + "─" * 5 + "[/dim cyan]")  # line
-            for _ in var_names:
-                sep.append("[dim cyan]" + "─" * 12 + "[/dim cyan]")  # 변수들
-            table.add_row(*sep)
+        for k in sorted(vars_snapshot.keys()):
+            v = vars_snapshot[k]
 
-    console.print(table)
+            if isinstance(v, (list, tuple)):
+                summary = summarize_list(v)
+                line = f"{k}: len{len(v)} → {summary}"
+                lines.append(line)
+
+        body = "\n".join(lines)
+
+        return Panel(
+            body,
+            padding=(0, 1),
+            border_style="blue",
+        )
+
+    # 모드 분기 패널
+    def build_panel(call_id, events):
+        mode = events[0]["mode"]
+        if mode == "list":
+            return build_list_panel(call_id, events)
+        else:
+            return build_var_panel(call_id, events)
+
+    # 트리 구성
+    def build_tree(call_id, parent_node):
+        label = f"{func_name_map[call_id]}  [dim](depth={depth_map[call_id]})[/dim]"
+        node = parent_node.add(label)
+
+        # 이 call_id에 해당하는 이벤트 묶음
+        events = grouped[call_id]
+
+        # 모드에 따라 패널 자동 생성
+        panel = build_panel(call_id, events)
+        node.add(panel)
+
+        # 자식 call_id 찾기
+        children = [cid for cid, pid in parent_map.items() if pid == call_id]
+
+        for child_id in children:
+            build_tree(child_id, node)
+
+    # 전체 트리 렌더링
+    root_label = f"[bold]{func_name_map[root_id]}[/bold]  [dim](root)[/dim]"
+    root = Tree(root_label)
+
+    build_tree(root_id, root)
+
+    console.print(root)
     console.input("\nPress Enter to exit...")
+
+
+# 트리 + 타임라인 통합
+def render_recursion(records):
+    render_recursion_tree(records)
 
 
 # -------------------------------------------------------
