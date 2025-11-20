@@ -129,9 +129,6 @@ def render_loop(records):
     for rec in records:
         grouped.setdefault(rec["iteration"], []).append(rec)
 
-    for iteration in grouped.keys():
-        recs = grouped[iteration]
-
     # iteration 식별
     iterations = grouped.keys()
 

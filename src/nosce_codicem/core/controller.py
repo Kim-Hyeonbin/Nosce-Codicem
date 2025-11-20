@@ -78,7 +78,7 @@ class TraceController:
         self._tracing = False
         sys.settrace(None)
 
-        # ★ 여기서 모든 handler의 finalize()를 한 번씩 호출
+        # 여기서 모든 handler의 finalize()를 한 번씩 호출
         for h in self._handlers:
             finalize = getattr(h, "finalize", None)
             if callable(finalize):
