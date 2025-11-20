@@ -1,4 +1,4 @@
-# 🪶 Nosce-Codicem: 네 코드를 알라
+# 🪶 Nosce-Codicem: 네 코드를 알라 ![PyPI](https://img.shields.io/pypi/v/nosce-codicem?color=4EC9B0&label=PyPI%20Version)
 *A CLI-based visualization tool for understanding your Python logic.*
 
 ---
@@ -224,4 +224,8 @@ merge_sort(arr)
 
 - **Python Standard Library (PSF License)**  
   - `sys.settrace` : 실행 흐름 추적  
-  - `subprocess` : viewer 독립 콘솔 실행  
+  - `subprocess` : viewer 독립 콘솔 실행
+
+ ---
+ ### 🔗 PyPI
+https://pypi.org/project/nosce-codicem/
