@@ -1,12 +1,12 @@
-import traceback
 import sys
 import json
-import time
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.tree import Tree
 from rich import box
+from rich.rule import Rule
+from rich.console import Group
 
 console = Console()
 
@@ -222,39 +222,35 @@ def render_recursion_tree(records):
         line = ", ".join(parts) if parts else "[dim]no variables[/dim]"
         header = f"[red]#{call_id}[/red]  {line}"
 
-        return Panel(
-            header,
-            padding=(0, 1),
-            border_style="green",
-        )
+        return Panel(header, padding=(0, 1), border_style="green", expand=False)
 
     # 리스트 패널
     def build_list_panel(call_id, events):
         rep = events[-1]
         vars_snapshot = rep.get("variables", {}) or {}
 
-        lines = [f"[red]#{call_id}[/red]"]
+        blocks = [f"[red]#{call_id}[/red]"]
+        blocks.append(Rule(style="dim"))
 
         def summarize_list(lst):
-            if len(lst) <= 2:
+            if len(lst) <= 20:
                 return ", ".join(str(x) for x in lst)
-            return f"{lst[0]}, {lst[1]}, ..."
+            else:
+                line_front = [str(lst[i]) for i in range(10)]
+                line_back = [str(lst[i]) for i in range(-10, 0)]
+            return ", ".join(line_front) + ", (...), " + ", ".join(line_back)
 
-        for k in sorted(vars_snapshot.keys()):
+        for idx, k in enumerate(vars_snapshot.keys()):
             v = vars_snapshot[k]
 
-            if isinstance(v, (list, tuple)):
+            if isinstance(v, list):
                 summary = summarize_list(v)
-                line = f"{k}: len{len(v)} → {summary}"
-                lines.append(line)
+                blocks.append(f"{k}(length={len(v)}): {summary}")
+                blocks.append(Rule(style="dim"))
 
-        body = "\n".join(lines)
+        body = Group(*blocks)
 
-        return Panel(
-            body,
-            padding=(0, 1),
-            border_style="blue",
-        )
+        return Panel(body, padding=(0, 1), border_style="blue", expand=False)
 
     # 모드 분기 패널
     def build_panel(call_id, events):
