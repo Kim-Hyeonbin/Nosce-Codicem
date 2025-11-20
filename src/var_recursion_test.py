@@ -1,4 +1,4 @@
-from nosce_codicem.facade.trace_api import trace
+from nosce_codicem import trace
 
 
 def fib(n):
@@ -16,4 +16,4 @@ def fib(n):
 # ---- 추적 ----
 trace.variable("n", "a", "b", "result").recursion("fib")
 
-fib(15)
+fib(5)

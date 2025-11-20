@@ -1,7 +1,6 @@
-from nosce_codicem.facade.trace_api import trace
+from nosce_codicem import trace
 
-# 변수 네 개 이상 추적, 루프 시작은 line 10
-trace.variable("i", "current", "min_val", "max_val", "count", "불리안").loop(17, 30)
+trace.variable("i", "current", "min_val", "max_val", "count", "bool").loop(16, 27)
 
 
 def variable_test():
@@ -12,7 +11,7 @@ def variable_test():
     min_val = 10000
     max_val = -(10**9)
     count = 0
-    불리안 = False
+    bool = False
 
     while i < len(nums):  # line 16
         current = nums[i]
@@ -23,8 +22,7 @@ def variable_test():
         if current > max_val:
             max_val = current
 
-        불리안 = not 불리안
-
+        bool = not bool
         count += 1
         i += 1
 

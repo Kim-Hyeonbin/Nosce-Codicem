@@ -1,4 +1,4 @@
-from nosce_codicem.facade.trace_api import trace
+from nosce_codicem import trace
 
 
 def merge_sort(arr):

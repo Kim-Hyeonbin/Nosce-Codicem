@@ -1,4 +1,4 @@
-from nosce_codicem.facade.trace_api import trace
+from nosce_codicem import trace
 
 # 리스트 두 개 추적, 루프 시작은 line 13
 trace.list("arr", "brr").loop(13, 16)
