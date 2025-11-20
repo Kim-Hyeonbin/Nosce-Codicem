@@ -277,7 +277,7 @@ def render_recursion_tree(records):
             build_tree(child_id, node)
 
     # 전체 트리 렌더링
-    root_label = f"[bold]{func_name_map[root_id]}[/bold]  [dim](root)[/dim]"
+    root_label = f"[bold]{func_name_map[root_id]}[/bold] [dim](root)[/dim]"
     root = Tree(root_label)
 
     build_tree(root_id, root)
